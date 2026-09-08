@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super Serious Sticker Shop</title>
+  <style>
+    :root {
+      --bg: #f6f2ea;
+      --card: #ffffff;
+      --ink: #222222;
+      --muted: #6f6a62;
+      --accent: #2f6f62;
+      --accent-dark: #24584e;
+      --border: #ded8ce;
+      --soft: #ece7de;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    header {
+      text-align: center;
+      padding: 42px 20px 24px;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 3rem);
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    main {
+      width: min(1100px, calc(100% - 28px));
+      margin: 0 auto 60px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+    }
+
+    .sticker-art {
+      height: 220px;
+      display: grid;
+      place-items: center;
+      background: #f0ece5;
+      padding: 0px;
+      overflow: hidden;
+    }
+
+    .sticker-art img {
+      height: 90%;
+      width: 90%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 8px rgba(0,0,0,.12));
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin: 0 0 14px;
+    }
+
+    label {
+      display: block;
+      font-size: .86rem;
+      font-weight: 700;
+      margin: 12px 0 6px;
+      color: #4f4a43;
+    }
+
+    select, input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 11px;
+      font: inherit;
+      background: white;
+    }
+
+    .qty-row {
+      display: grid;
+      grid-template-columns: 42px 1fr 42px;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .qty-row button {
+      border: 0;
+      border-radius: 10px;
+      background: var(--soft);
+      font-size: 1.4rem;
+      height: 42px;
+      cursor: pointer;
+    }
+
+    .qty-row button:hover {
+      background: #ddd6ca;
+    }
+
+    .qty-row input {
+      text-align: center;
+      height: 42px;
+    }
+
+    .line-price {
+      margin-top: 15px;
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+
+    .summary {
+      margin-top: 26px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+    }
+
+    .summary h2 {
+      margin: 0 0 15px;
+    }
+
+    #orderItems {
+      margin: 0;
+      padding-left: 20px;
+      color: #37332e;
+    }
+
+    #orderItems li {
+      margin: 7px 0;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .total {
+      border-top: 1px solid var(--border);
+      margin-top: 18px;
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.35rem;
+      font-weight: 900;
+    }
+
+    .copy-btn {
+      display: block;
+      width: 100%;
+      margin-top: 18px;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: white;
+      font-size: 1rem;
+      font-weight: 800;
+      padding: 14px 18px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-dark);
+    }
+
+    #copyStatus {
+      min-height: 1.2em;
+      margin-top: 9px;
+      text-align: center;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 0 20px 35px;
+      font-size: .88rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Super Serious Sticker Shop</h1>
+    <p>See anything you like?</p>
+  </header>
+
+  <main>
+    <section class="products" id="products"></section>
+
+    <section class="summary">
+      <h2>Your Order</h2>
+      <ul id="orderItems"></ul>
+      <p id="restockMessage" style="display: none;">
+        Oop. I'll need to make more. Give me an extra day.</p>
+      <div id="emptyMessage" class="empty">You don't want any? 🥺</div>
+
+      <div class="total">
+        <span>Total</span>
+        <span id="grandTotal">$0.00</span>
+      </div>
+
+      <button class="copy-btn" onclick="copyOrder()">Copy Order to Clipboard</button>
+      <div id="copyStatus"></div>
+    </section>
+  </main>
+
+  <footer>
+    Extremely legitimate sticker commerce. Unless you ask the IRS. Then this is a joke.
+  </footer>
+
+  <script>
+    /*
+      ===========================
+      EDIT YOUR STICKERS HERE
+      ===========================
+
+      For each sticker:
+      name = what Dad sees
+      image = image file name OR image URL
+      prices = price for each size
+
+      If you put image files in the SAME folder as this HTML,
+      you can use something like: "dog-sticker.png"
+    */
+
+    const stickers = [
+       {
+        name: "Logo",
+        image: "images/logo-v1.png",
+        restockThreshold: 50,
+        prices: { "2.5 inch": 0.25 }
+      },
+      {
+        name: "Sunsets on the Waterfront (Small)",
+        image: "images/sunset-v3.png",
+        restockThreshold: 50,
+        prices: { 
+          "2.25 inch": 0.25
+        }
+      },
+      {
+        name: "Sunsets on the Waterfront (Large)",
+        image: "images/sunset-v3.png",
+        restockThreshold: 16,
+        prices: { 
+          "4.25 inch": 2.00
+        }
+      },
+      {
+        name: "Flying Pig Provisions - Building",
+        image: "images/building.png",
+        restockThreshold: 50,
+        prices: { "1.7 inch": 0.25 }
+      },
+      {
+        name: "Town Clock",
+        image: "images/townclock.png",
+        restockThreshold: 50,
+        prices: { "2.25 inch": 0.25}
+      }
+    ];
+
+    const state = stickers.map(sticker => ({
+      size: Object.keys(sticker.prices)[0],
+      qty: 0
+    }));
+
+    function money(value) {
+      return "$" + value.toFixed(2);
+    }
+
+    function renderProducts() {
+      const container = document.getElementById("products");
+
+      container.innerHTML = stickers.map((sticker, index) => {
+        const sizeOptions = Object.entries(sticker.prices)
+          .map(([size, price]) =>
+            `<option value="${size}">${size} — ${money(price)}</option>`
+          ).join("");
+
+        return `
+          <article class="card">
+            <div class="sticker-art">
+              <img src="${sticker.image}" alt="${sticker.name}" />
+            </div>
+            <div class="card-body">
+              <h2>${sticker.name}</h2>
+
+              <label for="size-${index}">Size</label>
+              <select id="size-${index}" onchange="changeSize(${index}, this.value)">
+                ${sizeOptions}
+              </select>
+
+              <label>Quantity</label>
+              <div class="qty-row">
+                <button type="button" onclick="changeQty(${index}, -1)" aria-label="Decrease quantity">−</button>
+                <input
+                  id="qty-${index}"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value="0"
+                  onchange="setQty(${index}, this.value)"
+                />
+                <button type="button" onclick="changeQty(${index}, 1)" aria-label="Increase quantity">+</button>
+              </div>
+
+              <div class="line-price">
+                Item total: <span id="line-${index}">$0.00</span>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      updateSummary();
+    }
+
+    function changeSize(index, value) {
+      state[index].size = value;
+      updateSummary();
+    }
+
+    function changeQty(index, delta) {
+      state[index].qty = Math.max(0, state[index].qty + delta);
+      document.getElementById(`qty-${index}`).value = state[index].qty;
+      updateSummary();
+    }
+
+    function setQty(index, value) {
+      let qty = parseInt(value, 10);
+      if (Number.isNaN(qty) || qty < 0) qty = 0;
+      state[index].qty = qty;
+      document.getElementById(`qty-${index}`).value = qty;
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const items = [];
+      let grandTotal = 0;
+      let needsRestock = false;
+
+      stickers.forEach((sticker, index) => {
+        const selection = state[index];
+        const unitPrice = sticker.prices[selection.size];
+        const lineTotal = unitPrice * selection.qty;
+        if (selection.qty > sticker.restockThreshold) {
+            needsRestock = true;
+            }
+
+        document.getElementById(`line-${index}`).textContent = money(lineTotal);
+
+        if (selection.qty > 0) {
+          items.push({
+            name: sticker.name,
+            size: selection.size,
+            qty: selection.qty,
+            unitPrice,
+            total: lineTotal
+          });
+          grandTotal += lineTotal;
+        }
+      });
+
+      const list = document.getElementById("orderItems");
+      const empty = document.getElementById("emptyMessage");
+
+      if (items.length === 0) {
+        list.innerHTML = "";
+        empty.style.display = "block";
+      } else {
+        empty.style.display = "none";
+        list.innerHTML = items.map(item =>
+          `<li><strong>${item.qty}× ${item.name}</strong> — ${item.size} @ ${money(item.unitPrice)} = ${money(item.total)}</li>`
+        ).join("");
+      }
+
+      document.getElementById("grandTotal").textContent = money(grandTotal);
+      if (needsRestock) {
+      restockMessage.style.display = "block";
+        } else {
+          restockMessage.style.display = "none";
+          }
+    }
+
+    async function copyOrder() {
+      const selected = [];
+      let total = 0;
+
+      stickers.forEach((sticker, index) => {
+        const selection = state[index];
+        if (selection.qty > 0) {
+          const unit = sticker.prices[selection.size];
+          const line = unit * selection.qty;
+          total += line;
+          selected.push(
+            `${selection.qty}x ${sticker.name} — ${selection.size} — ${money(line)}`
+          );
+        }
+      });
+
+      const status = document.getElementById("copyStatus");
+
+      if (!selected.length) {
+        status.textContent = "My guy... there isn't anything to copy. Pick at least one sticker first 🙂";
+        return;
+      }
+
+      const text =
+`STICKER ORDER
+
+${selected.join("\n")}
+
+TOTAL: ${money(total)}`;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        status.textContent = "Order copied! Paste it into a text or email.";
+      } catch (err) {
+        window.prompt("Copy this order:", text);
+        status.textContent = "Order ready to copy.";
+      }
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
